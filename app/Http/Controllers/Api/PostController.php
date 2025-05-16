@@ -11,12 +11,28 @@ class PostController extends Controller
     public function index()
     {
         $posts = Post::published()
-            ->with(['categories', 'user'])
+            ->select('id', 'title', 'excerpt', 'featured_image', 'slug')
+            ->with(['categories:id,name,slug', 'user:id,name'])
             ->latest('published_at')
             ->paginate(10);
 
         return response()->json([
-            'data' => $posts->items(),
+            'data' => $posts->map(function ($post) {
+                return [
+                    'id' => $post->id,
+                    'title' => $post->title,
+                    'excerpt' => $post->excerpt,
+                    'featured_image' => $post->featured_image_url,
+                    'slug' => $post->slug,
+                    'categories' => $post->categories->map(function ($category) {
+                        return [
+                            'id' => $category->id,
+                            'name' => $category->name,
+                            'slug' => $category->slug
+                        ];
+                    })
+                ];
+            }),
             'meta' => [
                 'current_page' => $posts->currentPage(),
                 'total_pages' => $posts->lastPage(),
@@ -25,7 +41,6 @@ class PostController extends Controller
             ]
         ]);
     }
-
     public function show($slug)
     {
         $post = Post::published()
