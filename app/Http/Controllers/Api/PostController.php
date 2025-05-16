@@ -8,39 +8,44 @@ use App\Models\Category;
 
 class PostController extends Controller
 {
-    public function index()
-    {
-        $posts = Post::published()
-            ->select('id', 'title', 'excerpt', 'featured_image', 'slug')
-            ->with(['categories:id,name,slug', 'user:id,name'])
-            ->latest('published_at')
-            ->paginate(10);
+public function index()
+{
+    $posts = Post::published()
+        ->select('id', 'title', 'excerpt', 'featured_image', 'slug', 'published_at')
+        ->with(['categories:id,name,slug'])
+        ->latest('published_at')
+        ->paginate(10);
 
-        return response()->json([
-            'data' => $posts->map(function ($post) {
-                return [
-                    'id' => $post->id,
-                    'title' => $post->title,
-                    'excerpt' => $post->excerpt,
-                    'featured_image' => $post->featured_image,
-                    'slug' => $post->slug,
-                    'categories' => $post->categories->map(function ($category) {
-                        return [
-                            'id' => $category->id,
-                            'name' => $category->name,
-                            'slug' => $category->slug
-                        ];
-                    })
-                ];
-            }),
-            'meta' => [
-                'current_page' => $posts->currentPage(),
-                'total_pages' => $posts->lastPage(),
-                'per_page' => $posts->perPage(),
-                'total_items' => $posts->total(),
-            ]
-        ]);
-    }
+    return response()->json([
+        'data' => $posts->map(function ($post) {
+            return [
+                'id' => $post->id,
+                'title' => $post->title,
+                'excerpt' => $post->excerpt,
+                'featured_image' => $post->featured_image_url,
+                'slug' => $post->slug,
+                'published_at' => [
+                    'raw' => $post->published_at,
+                    'relative' => $post->published_at->diffForHumans(),
+                    'formatted' => $post->published_at->format('M j, Y')
+                ],
+                'categories' => $post->categories->map(function ($category) {
+                    return [
+                        'id' => $category->id,
+                        'name' => $category->name,
+                        'slug' => $category->slug
+                    ];
+                })
+            ];
+        }),
+        'meta' => [
+            'current_page' => $posts->currentPage(),
+            'total_pages' => $posts->lastPage(),
+            'per_page' => $posts->perPage(),
+            'total_items' => $posts->total(),
+        ]
+    ]);
+}
     public function show($slug)
     {
         $post = Post::published()
