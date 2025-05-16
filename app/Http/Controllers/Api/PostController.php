@@ -22,7 +22,7 @@ public function index()
                 'id' => $post->id,
                 'title' => $post->title,
                 'excerpt' => $post->excerpt,
-                'featured_image' => $post->featured_image_url,
+                'featured_image' => $post->featured_image,
                 'slug' => $post->slug,
                 'published_at' => [
                     'raw' => $post->published_at,
