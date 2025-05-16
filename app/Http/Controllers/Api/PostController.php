@@ -22,7 +22,7 @@ class PostController extends Controller
                     'id' => $post->id,
                     'title' => $post->title,
                     'excerpt' => $post->excerpt,
-                    'featured_image' => $post->featured_image_url,
+                    'featured_image' => $post->featured_image,
                     'slug' => $post->slug,
                     'categories' => $post->categories->map(function ($category) {
                         return [
